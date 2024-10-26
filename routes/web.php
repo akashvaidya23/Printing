@@ -22,3 +22,4 @@ Route::get('/', function () {
 Route::resource("product",ProductController::class);
 Route::resource("billing",BillingController::class);
 Route::post("/product/search",[ProductController::class,'search'])->name('product_search');
+Route::post("/product/options",[ProductController::class,'search_options'])->name('search_options');

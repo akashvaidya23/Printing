@@ -94,4 +94,23 @@ class ProductController extends Controller
 
         return view("products.search-result", compact('products'));
     }
+
+    public function search_options(Request $request)
+    {
+        $query = $request->input('query');
+        if(empty($query)) {
+            return response()->json([]);
+        }
+        
+        $results = Product::where('name', 'LIKE', '%' . $query . '%')
+            ->select('id', 'name')
+            ->limit(10)
+            ->get();
+    
+        $formattedResults = $results->map(function ($item) {
+            return ['id' => $item->id, 'text' => $item->name];
+        });
+    
+        return response()->json($formattedResults);
+    }
 }

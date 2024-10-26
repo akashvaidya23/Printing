@@ -69,7 +69,7 @@
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <button class="nav-link text-white" data-bs-toggle="modal" data-bs-target="#productModal">Add Products</button>
+                        <a class="nav-link text-white" href="{{route('product.create')}}">Products</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-white" href="{{route('billing.create')}}">Billing</a>
