@@ -24,7 +24,7 @@ class ProductController extends Controller
     {
         $products = Product::orderBy('id', 'desc')
             ->paginate(100);
-        return view('welcome', compact("products"));
+        return view('products.create', compact("products"));
     }
 
     /**
@@ -92,7 +92,7 @@ class ProductController extends Controller
         $products = Product::where('name', 'LIKE', '%' . $query . '%')
             ->paginate(100);
 
-        return view("products.search-result", compact('products'));
+        return view("products.partials.product_table_body", compact('products'));
     }
 
     public function search_options(Request $request)
