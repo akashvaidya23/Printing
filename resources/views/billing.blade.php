@@ -117,6 +117,18 @@
                     </tfoot>
                 </table>
             </div>
+            <div class="container text-center">
+                <div class="row align-items-end">
+                    <div class="col">
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" name="total_paid" placeholder="Amount Paid" id="total_paid" autocomplete="off">
+                    </div>
+                    <div class="col">
+                        <input type="number" class="form-control" name="total_due" placeholder="Amount Due" id="total_due" autocomplete="off">
+                    </div>
+                </div>
+            </div>
             <input type="hidden" name="total_qty" class="total_qty" id="total_qty">
             <input type="hidden" name="total_price" class="total_price" id="total_price">
             <br>
@@ -260,6 +272,7 @@
                 updateRowIndices(); 
                 updateTableTotals();
                 updateAllRowIndices();
+                calculateTotal();
             });
 
             $('#submit_bill').on('submit', function(event) {
@@ -349,6 +362,32 @@
                 const updatedName = name.replace(/\[\d+\]/, `[${index}]`);
                 $(this).attr('name', updatedName);
             });
+        }
+
+        $("#total_paid").on('input', function(e){
+            e.preventDefault();
+            // var total_paid = $("#total_paid").val();
+            // var total_amount = $("#total_price").val();
+            // var total_due = total_amount - total_paid;
+            // console.log(total_amount, total_paid, total_paid);
+            // if(total_due < 0){
+            //     $("#total_due").val(0.00);    
+            // } else {
+            //     $("#total_due").val(total_due);
+            // }
+            calculateTotal();
+        });
+
+        function calculateTotal() {
+            var total_paid = $("#total_paid").val();
+            var total_amount = $("#total_price").val();
+            var total_due = total_amount - total_paid;
+            console.log(total_amount, total_paid, total_paid);
+            if(total_due < 0){
+                $("#total_due").val(0.00);    
+            } else {
+                $("#total_due").val(total_due);
+            }
         }
     </script>
 </body>

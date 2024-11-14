@@ -88,14 +88,24 @@
 
     <br>
 
-    <div class="table-container">
-        <table class="table table-striped">
+    <div class="table-container" >
+        <div class="button-container">
+            <form id="searchOrders" class="d-flex">
+                @csrf
+                <input type="date" class="form-control search-input" name="query" placeholder="From Date" id="searchOrderFrom">
+                <input type="date" class="form-control search-input" name="query" placeholder="From Date" id="searchOrderTo">
+            </form>
+            <a href="/dashboard" class="btn btn-dark">Clear</a>
+        </div>
+        <table class="table table-striped" id="dashboard">
             <thead>
                 <tr>
                     <th class="cell" scope="col">Sr. No</th>
                     <th class="cell" scope="col">Date</th>
                     <th class="cell" scope="col">Total Orders</th>
                     <th class="cell" scope="col">Total Products</th>
+                    <th class="cell" scope="col">Total Paid</th>
+                    <th class="cell" scope="col">Total Due</th>
                     <th class="cell" scope="col">Total Amount</th>
                 </tr>
             </thead>
@@ -106,6 +116,8 @@
                         <td class="cell">{{ \Carbon\Carbon::parse($order->order_date)->format('d - F - Y') }}</td>
                         <td class="cell">{{$order->total_orders}}</td>
                         <td class="cell">{{$order->total_products}}</td>
+                        <td class="cell">{{ 'Rs. ' . $order->total_paid . '/-'}}</td>
+                        <td class="cell">{{ 'Rs. ' . $order->total_due . '/-'}}</td>
                         <td class="cell">{{ 'Rs. ' . $order->total_amount . '/-' }} </td>
                     </tr>
                 @endforeach
@@ -117,6 +129,28 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 <script>
-    
+    $("#searchOrderTo").on('change',function(e){
+        e.preventDefault();
+        let start_date = $('#searchOrderFrom').val();
+        let end_date = $('#searchOrderTo').val();
+        
+        console.log({start_date, end_date});
+
+        if(start_date == null){
+            alert('Pleasse select start date');
+            return;
+        }
+        if(start_date != null && end_date != null){
+            $.ajax({
+                url: '/dashboard/get/'+ start_date + '/' + end_date,
+                type: 'GET',
+                datatype: 'html',
+                success: function (response) {
+                    console.log(response);
+                    $("#dashboard tbody").html(response);
+                }
+            });
+        }
+    })
 </script>
 </html>

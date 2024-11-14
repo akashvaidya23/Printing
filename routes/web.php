@@ -34,3 +34,6 @@ Route::post("/add/product",[BillingController::class,"add_product"])->name("add_
 Route::post('/generate-pdf', [BillingController::class, 'generatePDF'])->name('generate.pdf');
 Route::get('/generate-pdf/{id}', [BillingController::class, 'generatePDF_1'])->name('generateInvoice');
 Route::get('dashboard',[BillingController::class,'dashboard'])->name('dashboard');
+Route::get('/dashboard/get/{start_date}/{end_date}',[BillingController::class,'getDateFilter'])->name('dashboard_get');
+Route::get('/getOrderPayments/{id}',[BillingController::class,'getOrderPayments'])->name('getOrderPayments');
+Route::post('/addOrderPayment',[BillingController::class,'addOrderPayment'])->name('addOrderPayment');

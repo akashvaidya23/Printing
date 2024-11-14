@@ -163,6 +163,10 @@
         .footer p {
             margin: 5px 0;
         }
+
+        .cell {
+            border: 1px solid black;
+        }
     </style>
 </head>
 
@@ -218,25 +222,45 @@
         <table class="products">
             <thead>
                 <tr>
-                    <th>Sr. No</th>
-                    <th>Product Name</th>
-                    <th>Quantity</th>
-                    <th>Height</th>
-                    <th>Width</th>
-                    <th>Price</th>
-                    <th>Total</th>
+                    <th class="cell">Sr. No</th>
+                    <th class="cell">Product Name</th>
+                    <th class="cell">Quantity</th>
+                    <th class="cell">Height</th>
+                    <th class="cell">Width</th>
+                    <th class="cell">Price</th>
+                    <th class="cell">Total</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($products as $key => $product)
                     <tr>
-                        <td>{{ $key + 1 }}</td>
-                        <td>{{ $product->product_name }}</td>
-                        <td>{{ $product->quantity }}</td>
-                        <td>{{ $product->height }}</td>
-                        <td>{{ $product->width }}</td>
-                        <td>{{ number_format($product->price, 2) }}</td>
-                        <td>{{ number_format($product->total, 2) }}</td>
+                        <td class="cell">{{ $key + 1 }}</td>
+                        <td class="cell">{{ $product->product_name }}</td>
+                        <td class="cell">{{ $product->quantity }}</td>
+                        <td class="cell">{{ $product->height }}</td>
+                        <td class="cell">{{ $product->width }}</td>
+                        <td class="cell">{{ number_format($product->price, 2) }}</td>
+                        <td class="cell">{{ number_format($product->total, 2) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <h3>Payments</h3>
+        <table class="products">
+            <thead>
+                <tr>
+                    <th class="cell">Sr. No</th>
+                    <th class="cell">Amount Paid</th>
+                    <th class="cell">Date Paid</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($payment_history as $key => $payment)
+                    <tr>
+                        <td class="cell">{{ $key+1 }}</td>
+                        <td class="cell">{{ $payment->amount }}</td>
+                        <td class="cell">{{ $payment->created_at }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -247,6 +271,14 @@
             <tr class="total-row">
                 <td>Total Quantity:</td>
                 <td>{{ number_format($order->total_products, 2) }}</td>
+            </tr>
+            <tr class="total-row">
+                <td>Amount Paid:</td>
+                <td>{{ number_format($order->total_paid, 2) }}</td>
+            </tr>
+            <tr class="total-row">
+                <td>Amount Due:</td>
+                <td>{{ number_format($order->total_due, 2) }}</td>
             </tr>
             <tr class="total-row">
                 <td>Total Amount:</td>

@@ -105,6 +105,8 @@
                     <th class="cell" scope="col">Customer Name</th>
                     <th class="cell" scope="col">Customer Mobile</th>
                     <th class="cell" scope="col">Total Products</th>
+                    <th class="cell" scope="col">Total Paid</th>
+                    <th class="cell" scope="col">Total Due</th>
                     <th class="cell" scope="col">Total Amount</th>
                     <th class="cell" scope="col">Action</th>
                 </tr>
@@ -117,13 +119,17 @@
                         <td class="cell">{{$order->customer_name}}</td>
                         <td class="cell">{{$order->customer_mobile}}</td>
                         <td class="cell">{{$order->total_products}}</td>
+                        <td class="cell">{{$order->total_paid}}</td>
+                        <td class="cell">{{$order->total_due}}</td>
                         <td class="cell">{{$order->total_amount}}</td>
-                        <td class="cell">
-                            <a href="javascript:void(0);" data-id="{{ $order->id }}" class="btn btn-info view-order">View</a>
-                            <a href="javascript:void(0);" data-id="{{ $order->id }}" class="btn btn-primary generate-invoice">
-                                Invoice
-                            </a>
+                        <td class="cell" style="white-space: nowrap;">
+                            <a href="javascript:void(0);" data-id="{{ $order->id }}" class="btn btn-info view-order" style="display: inline-block;">View</a>
+                            <a href="javascript:void(0);" data-id="{{ $order->id }}" class="btn btn-primary generate-invoice" style="display: inline-block;">Invoice</a>
+                            @if ($order->total_due != 0)
+                                <a href="#" data-id="{{ $order->id }}" class="btn btn-primary add-payment" style="display: inline-block;">Add Payment</a>
+                            @endif
                         </td>
+
                     </tr>
                 @endforeach
             </tbody>
@@ -148,6 +154,36 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">Payments for Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <p id="total_paid_model">Total Paid</p>
+                        <p id="total_due_model">Total Due</p>
+                    </div>
+                    <div id="existingPayments">
+                        
+                    </div>
+                    <hr>
+                    <form id="newPaymentForm">
+                        <h5>Add New Payment</h5>
+                        <div class="mb-3">
+                            <label for="paymentAmount" class="form-label">Payment Amount</label>
+                            <input type="number" id="paymentAmount" name="paymentAmount" class="form-control" min="1" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Payment</button>
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>    
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
@@ -196,6 +232,81 @@
                 error: function (xhr, status, error) {
                     console.error("Error fetching order details:", error);
                     alert("Could not fetch order details. Please try again later.");
+                }
+            });
+        });
+
+        $('.add-payment').on('click', function () {
+            const orderId = $(this).data('id');
+            const url = "{{ route('getOrderPayments', ':id') }}".replace(':id', orderId);
+
+            // Load existing payments
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (response) {
+                    $('#existingPayments').html(response.existingPaymentsHtml);
+                    $('#total_paid_model').text("Total Paid: " + response.totalPaid);
+                    $('#total_due_model').text("Total Due: " + response.totalDue);
+                    if (response.totalDue === 0) {
+                        $('#newPaymentForm').hide(); // Hide form if due is zero
+                    } else {
+                        $('#newPaymentForm').show(); // Show form if there is due
+                    }
+                    $('#paymentModal').modal('show');
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error loading payments:", error);
+                    alert("Could not load payment options. Please try again later.");
+                }
+            });
+        });
+
+        $('#newPaymentForm').on('submit', function (event) {
+            event.preventDefault();
+            
+            const orderId = $('.add-payment').data('id'); // Get the order ID
+            const paymentAmount = $('#paymentAmount').val();
+            const totalDue = parseFloat($('#total_due_model').text().replace("Total Due: ", ""));
+            console.log({orderId, paymentAmount, totalDue});
+            if (paymentAmount > totalDue) {
+                alert("The payment amount cannot exceed the total due amount.");
+                return;
+            }
+            $.ajax({
+                url: "{{ route('addOrderPayment') }}",
+                type: 'POST',
+                dataType: 'html',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    order_id: orderId,
+                    amount: paymentAmount
+                },
+                success: function (response) {
+                    // Update the modal with new payment details
+                    const data = JSON.parse(response)
+                    console.log(data.newTotalDue);
+                    
+                    $('#existingPayments').html(data.updatedPaymentsHtml);
+                    $('#paymentAmount').val('');
+                    $('#total_paid_model').text('Total Paid: ' + data.newTotalPaid);
+                    $('#total_due_model').text('Total Due: ' + data.newTotalDue);
+                    // Update the main table row with new totals
+                    // const orderRow = $('a.add-payment[data-id="' + orderId + '"]').closest('tr');
+                    // orderRow.find('.cell:eq(5)').text(response.newTotalPaid);
+                    // orderRow.find('.cell:eq(6)').text(response.newTotalDue);
+
+                    if (data.newTotalDue == 0) {
+                        $('#newPaymentForm').hide();
+                    } else {
+                        $('#newPaymentForm').show();
+                    }
+                    $('#paymentModal').modal('show');
+                    alert("Payment added successfully.");
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error adding payment:", error);
+                    alert("Failed to add payment. Please try again.");
                 }
             });
         });
