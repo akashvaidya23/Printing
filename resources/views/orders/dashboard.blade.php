@@ -75,7 +75,7 @@
                         <a class="nav-link text-white" href="{{route('billing.create')}}">Billing</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="#">Orders</a>
+                        <a class="nav-link text-white" href="{{route('order.index')}}">Orders</a>
                     </li>
                 </ul>
             </div>

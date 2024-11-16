@@ -22,7 +22,7 @@ Route::get('/', function () {
     $orders = Order::selectRaw('DATE(created_at) as order_date, COUNT(id) as total_orders, SUM(total_products) as total_products, SUM(total_amount) as total_amount')
             ->groupBy(DB::raw('DATE(created_at)'))
             ->paginate(100);
-    return view('welcome',compact('orders'));
+    return view('orders.dashboard',compact('orders'));
 });
 
 Route::resource("product",ProductController::class);

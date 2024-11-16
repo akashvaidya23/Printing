@@ -183,7 +183,9 @@ class BillingController extends Controller
         $payment_history = DB::table('payments')
             ->where('order_id',$order['id'])
             ->get();
-        $pdf = Pdf::loadView('pdf.billing_invoice', compact('order', 'products', 'payment_history'));
+        $imagePath = public_path('storage/images/logo.png');
+        $base64Image = 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath));            
+        $pdf = Pdf::loadView('pdf.billing_invoice', compact('order', 'products', 'payment_history', 'base64Image'));
         return response($pdf->output(), 200)->header('Content-Type', 'application/pdf');
     }
 

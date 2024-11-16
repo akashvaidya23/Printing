@@ -167,6 +167,12 @@
         .cell {
             border: 1px solid black;
         }
+
+        @media print {
+        img {
+            display: block !important;
+        }
+    }
     </style>
 </head>
 
@@ -182,7 +188,7 @@
                         <p>Email: info@company.com | Phone: (123) 456-7890</p>
                     </td>
                     <td class="company-logo">
-                        <img src="{{ asset('images/your_logo.png') }}" alt="Company Logo" />
+                        <img src="{{ $base64Image }}" alt="Company Logo" />
                     </td>
                 </tr>
             </table>
