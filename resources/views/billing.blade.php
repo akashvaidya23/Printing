@@ -94,19 +94,21 @@
                 <table class="table table-striped" id="order_products">
                     <thead>
                         <tr>
-                            <th class="cell">Sr.No</th>
-                            <th class="cell">Name of the Product</th>
-                            <th class="cell">Quantity</th>
+                            <th class="cell">#</th>
+                            <th class="cell">Product</th>
                             <th class="cell">Height</th>
                             <th class="cell">Width</th>
+                            <th class="cell">Quantity</th>
                             <th class="cell">Price</th>
+                            <th class="cell">Other Charges</th>
+                            <th class="cell">Design Charges</th>
                             <th class="cell">Total</th>
                             <th class="cell">Action</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                     <tfoot>
-                        <th class="cell" colspan="2"></th>
+                        <th class="cell" colspan="4"></th>
                         <th class="cell totalQty">
                             Total Quantity:                            
                         </th>
@@ -125,7 +127,7 @@
                         <input type="number" class="form-control" name="total_paid" placeholder="Amount Paid" id="total_paid" autocomplete="off">
                     </div>
                     <div class="col">
-                        <input type="number" class="form-control" name="total_due" placeholder="Amount Due" id="total_due" autocomplete="off">
+                        <input type="number" class="form-control" name="total_due" placeholder="Amount Due" id="total_due" autocomplete="off" readonly="true" style="background-color: rgb(233, 232, 232)">
                     </div>
                 </div>
             </div>
@@ -227,52 +229,52 @@
             });
 
             // Event listener for quantity change
-            $('#order_products').on('input', '.quantity, .height, .width, .price', function () {
-                updateRowTotal($(this).closest('tr'));
+            $('#order_products').on('input', '.height, .width, .quantity, .price, .other-charges, .design-charges', function () {
+                const row = $(this).closest('tr');
+                updateRowTotals(row);
                 updateTableTotals();
             });
 
             // Function to calculate and update the total for each row
-            function updateRowTotal(row) {
-                var quantity = parseFloat(row.find('.quantity').val()) || 0;
-                var height = parseFloat(row.find('.height').val()) || 0;
-                var width = parseFloat(row.find('.width').val()) || 0;
-                var price = parseFloat(row.find('.price').val()) || 0;
-                var total = quantity * height * width * price;
-                console.log('total ', total);
-                
-                row.find('.total').val(total.toFixed(2));
+            function updateRowTotals(row) {
+                const height = parseFloat(row.find('.height').val()) || 0;
+                const width = parseFloat(row.find('.width').val()) || 0;
+                const quantity = parseFloat(row.find('.quantity').val()) || 0;
+                const price = parseFloat(row.find('.price').val()) || 0;
+                const otherCharges = parseFloat(row.find('.other-charges').val()) || 0;
+                const designCharges = parseFloat(row.find('.design-charges').val()) || 0;
+
+                const rowTotal = (height * width * quantity * price) + otherCharges + designCharges;
+                row.find('.total').val(rowTotal.toFixed(2));
             }
 
             // Function to calculate and update the table totals (Total Quantity and Total Price)
             function updateTableTotals() {
-                let totalSum = 0;
                 let totalQty = 0;
-                
-                $('#order_products tbody tr').each(function() {
-                    let quantity = parseFloat($(this).find('.quantity').val()) || 0;
-                    let height = parseFloat($(this).find('.height').val()) || 0;
-                    let width = parseFloat($(this).find('.width').val()) || 0;
-                    let price = parseFloat($(this).find('.price').val()) || 0;
-                    totalQty += quantity;
-                    totalSum += quantity * height * width * price;
+                let totalSum = 0;
+
+                $('#order_products tbody tr').each(function () {
+                    const row = $(this);
+                    updateRowTotals(row);
+
+                    totalQty += parseFloat(row.find('.quantity').val()) || 0;
+                    totalSum += parseFloat(row.find('.total').val()) || 0;
                 });
-                
-                // Update the footer with the total quantity and total price
+
+                // Update footer totals
                 $('#order_products tfoot .totalQty').text(`Total Quantity: ${totalQty.toFixed(2)}`);
                 $('#order_products tfoot .totalPrice').text(`Total Price: ${totalSum.toFixed(2)}`);
                 $('#total_price').val(totalSum.toFixed(2));
                 $('#total_qty').val(totalQty);
+
+                calculateTotal();
             }
 
             // Event listener to remove a row and recalculate totals
-            $('#order_products').on('click', '.delete-button', function(e){
+            $('#order_products').on('click', '.delete-button', function () {
                 $(this).closest('tr').remove();
-                updateRowIds();
-                updateRowIndices(); 
+                updateRowIndices();
                 updateTableTotals();
-                updateAllRowIndices();
-                calculateTotal();
             });
 
             $('#submit_bill').on('submit', function(event) {
@@ -336,6 +338,12 @@
             const currentRow = $(this).closest('tr');
             const rowIndex = parseInt(currentRow.find('td:first').text()) || 1;
             const newRow = currentRow.clone();
+            newRow.find('.height').val(0.00);
+            newRow.find('.width').val(0.00);
+            newRow.find('.quantity').val(0.00);
+            newRow.find('.other-charges').val(0.00);
+            newRow.find('.design-charges').val(0.00);
+            newRow.find('.total').val(0.00);
             newRow.find('td:first').text(rowIndex + 1);
             updateRowNames(newRow, rowIndex + 1);
             newRow.insertAfter(currentRow);
@@ -379,15 +387,10 @@
         });
 
         function calculateTotal() {
-            var total_paid = $("#total_paid").val();
-            var total_amount = $("#total_price").val();
-            var total_due = total_amount - total_paid;
-            console.log(total_amount, total_paid, total_paid);
-            if(total_due < 0){
-                $("#total_due").val(0.00);    
-            } else {
-                $("#total_due").val(total_due);
-            }
+            const totalPaid = parseFloat($("#total_paid").val()) || 0;
+            const totalAmount = parseFloat($("#total_price").val()) || 0;
+            const totalDue = Math.max(totalAmount - totalPaid, 0);
+            $("#total_due").val(totalDue.toFixed(2));
         }
     </script>
 </body>

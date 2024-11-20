@@ -173,6 +173,7 @@
                     <hr>
                     <form id="newPaymentForm">
                         <h5>Add New Payment</h5>
+                        <input type="hidden" name="order_id" id="order_id">
                         <div class="mb-3">
                             <label for="paymentAmount" class="form-label">Payment Amount</label>
                             <input type="number" id="paymentAmount" name="paymentAmount" class="form-control" min="1" required>
@@ -238,6 +239,8 @@
 
         $('.add-payment').on('click', function () {
             const orderId = $(this).data('id');
+            // alert(orderId);
+            $("#order_id").val(orderId);
             const url = "{{ route('getOrderPayments', ':id') }}".replace(':id', orderId);
 
             // Load existing payments
@@ -264,11 +267,14 @@
 
         $('#newPaymentForm').on('submit', function (event) {
             event.preventDefault();
-            
-            const orderId = $('.add-payment').data('id'); // Get the order ID
+            // console.log($(this));
+            const orderId = $("#order_id").val();
+            // const orderId = $('.add-payment').data('id'); // Get the order ID
+            // alert(orderId);
             const paymentAmount = $('#paymentAmount').val();
             const totalDue = parseFloat($('#total_due_model').text().replace("Total Due: ", ""));
             console.log({orderId, paymentAmount, totalDue});
+            // return;
             if (paymentAmount > totalDue) {
                 alert("The payment amount cannot exceed the total due amount.");
                 return;

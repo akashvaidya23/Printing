@@ -234,6 +234,8 @@
                     <th class="cell">Height</th>
                     <th class="cell">Width</th>
                     <th class="cell">Price</th>
+                    <th class="cell">Design Charges</th>
+                    <th class="cell">Other Charges</th>
                     <th class="cell">Total</th>
                 </tr>
             </thead>
@@ -246,6 +248,8 @@
                         <td class="cell">{{ $product->height }}</td>
                         <td class="cell">{{ $product->width }}</td>
                         <td class="cell">{{ number_format($product->price, 2) }}</td>
+                        <td class="cell">{{ number_format($product->design_charges, 2) }}</td>
+                        <td class="cell">{{ number_format($product->other_charges, 2) }}</td>
                         <td class="cell">{{ number_format($product->total, 2) }}</td>
                     </tr>
                 @endforeach

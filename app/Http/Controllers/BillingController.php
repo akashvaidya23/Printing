@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon as SupportCarbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class BillingController extends Controller
 {
@@ -57,6 +58,8 @@ class BillingController extends Controller
                 'order_id' => $order->id,
                 'product_id' => $product['product_id'],
                 'price' => $product['price'],
+                'design_charges' => $product['design_-harges'],
+                'other_charges' => $product['other-charges'],
                 'total' => $product['total'],
                 'quantity' => $product['quantity'],
                 'size' => $product['size'],
@@ -114,9 +117,6 @@ class BillingController extends Controller
         $product_id = $request->product_id;
         $row_count = $request->rowCount;
         $product_details = Product::find($product_id);
-        // echo "<pre>";
-        // print_r($product_details);
-        // die;
         return view('products.partials.product-list', compact('product_details', 'row_count'));
     }
 
@@ -148,6 +148,8 @@ class BillingController extends Controller
                 'order_id' => $order->id,
                 'product_id' => $product['product_id'],
                 'price' => $product['price'],
+                'design_charges' => $product['design-charges'],
+                'other_charges' => $product['other-charges'],
                 'total' => $product['total'],
                 'quantity' => $product['quantity'],
                 'height' => $product['height'],
@@ -164,11 +166,17 @@ class BillingController extends Controller
             ->where('order_id',$order['id'])
             ->get();
 
+        $imagePath = public_path('storage/images/logo.png');
+        $base64Image = 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath));
+
         $pdf = Pdf::loadView('pdf.billing_invoice', [
             'order' => $order,
             'products' => $products,
-            'payment_history' => $payment_history
+            'payment_history' => $payment_history,
+            'base64Image' => $base64Image
         ]);
+
+        $this->sendTelegramMessage($order);
 
         return $pdf->stream('invoice.pdf');
     }
@@ -248,5 +256,28 @@ class BillingController extends Controller
             ->paginate(100);
 
         return view('orders.dashboard_table',compact('orders'));
+    }
+
+    function sendTelegramMessage($order)
+    {
+        $url = "https://api.telegram.org/bot7365428591:AAGuJQPtuffjtu0drAXh6bBVHnm0-xgdn14/sendMessage";
+
+        $msg = "Mahalaxmi Flex, New Order ID: {$order->id}\n" .
+            "Amount: {$order->total_amount}\n" .
+            "Paid: {$order->total_paid}\n" .
+            "Amount Due: {$order->total_due}\n" .
+            "Customer Name: {$order->customer_name}\n".
+            "Customer Mobile: {$order->customer_mobile}";
+        
+        $response = Http::get($url, [
+            'chat_id' => '1720677037',
+            'text' => $msg
+        ]);
+
+        if ($response->successful()) {
+            return $response->json();
+        } else {
+            return $response->throw();
+        }
     }
 }

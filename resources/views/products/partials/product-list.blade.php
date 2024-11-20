@@ -18,6 +18,12 @@
         <input type="number" class="form-control price" name="products[{{$row_count}}][price]" value="{{number_format($product_details->price, 2)}}">
     </td>
     <td class="cell">
+        <input type="number" class="form-control other-charges" name="products[{{$row_count}}][other-charges]" value="0">
+    </td>
+    <td class="cell">
+        <input type="number" class="form-control design-charges" name="products[{{$row_count}}][design-charges]" value="0">
+    </td>
+    <td class="cell">
         <input type="number" class="form-control total" name="products[{{$row_count}}][total]" value="0.00" readonly>
     </td>
     <td class="cell">
